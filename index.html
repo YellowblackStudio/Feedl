@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <title>FeedL</title>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -19,7 +16,6 @@ body {
     overflow: hidden;
 }
 
-/* FEED */
 #feed {
     height: 100vh;
     width: 100vw;
@@ -27,7 +23,10 @@ body {
     scroll-snap-type: y mandatory;
 }
 
-/* VIDEO */
+#feed::-webkit-scrollbar {
+    display: none;
+}
+
 .video-box {
     height: 100vh;
     width: 100vw;
@@ -39,19 +38,37 @@ video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    background: black;
 }
 
-/* TEXTO DO CRIADOR */
+/* Criador */
 .creator {
     position: absolute;
     bottom: 90px;
     left: 15px;
-    font-size: 16px;
     font-weight: bold;
     text-shadow: 0 0 5px black;
 }
 
-/* DOWNBAR */
+/* Botões */
+.actions {
+    position: absolute;
+    right: 15px;
+    bottom: 120px;
+    text-align: center;
+}
+
+.action-btn {
+    font-size: 32px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.likes {
+    font-size: 14px;
+}
+
+/* Barra inferior */
 #downbar {
     position: fixed;
     bottom: 0;
@@ -61,7 +78,6 @@ video {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    z-index: 10;
 }
 
 #plus {
@@ -73,7 +89,6 @@ video {
     height: 48px;
     text-align: center;
     line-height: 48px;
-    text-decoration: none;
     font-weight: bold;
 }
 </style>
@@ -85,17 +100,15 @@ video {
 
 <div id="downbar">
     <div>🏠</div>
-    <a id="plus" href="">+</a>
+    <div id="plus">+</div>
     <div>👤</div>
 </div>
 
 <script>
-// LISTA DE VÍDEOS COM CRIADOR
 const videos = [
     { src: "Vídeos/f1b16f161809063c7ba9c09ff397ab20.mp4", creator: "Yellowblack147" }
 ];
 
-// EMBARALHAR ORDEM
 videos.sort(() => Math.random() - 0.5);
 
 const feed = document.getElementById("feed");
@@ -109,31 +122,66 @@ videos.forEach(v => {
     video.loop = true;
     video.playsInline = true;
     video.controls = false;
+    video.muted = true;
+    video.autoplay = true;
+    video.setAttribute("muted", "");
+
+    // Tap pausa/play
+    video.addEventListener("click", () => {
+        if (video.paused) video.play();
+        else video.pause();
+    });
 
     const creator = document.createElement("div");
     creator.className = "creator";
     creator.textContent = "@" + v.creator;
 
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    let likes = Math.floor(Math.random() * 1000);
+
+    const likeBtn = document.createElement("div");
+    likeBtn.className = "action-btn";
+    likeBtn.textContent = "❤️";
+
+    const likeCount = document.createElement("div");
+    likeCount.className = "likes";
+    likeCount.textContent = likes;
+
+    let liked = false;
+    likeBtn.onclick = () => {
+        liked = !liked;
+        likes += liked ? 1 : -1;
+        likeCount.textContent = likes;
+        likeBtn.style.transform = "scale(1.3)";
+        setTimeout(() => likeBtn.style.transform = "scale(1)", 150);
+    };
+
+    actions.appendChild(likeBtn);
+    actions.appendChild(likeCount);
+
     box.appendChild(video);
     box.appendChild(creator);
+    box.appendChild(actions);
     feed.appendChild(box);
 });
 
-/* AUTOPLAY */
+/* Autoplay inteligente */
 const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         const video = entry.target.querySelector("video");
-        if (entry.isIntersecting) {
-            video.play();
-        } else {
-            video.pause();
-        }
+        if (entry.isIntersecting) video.play();
+        else video.pause();
     });
 }, { threshold: 0.75 });
 
-document.querySelectorAll(".video-box").forEach(box => {
-    observer.observe(box);
-});
+document.querySelectorAll(".video-box").forEach(box => observer.observe(box));
+
+/* Primeiro toque liga som */
+document.addEventListener("click", () => {
+    document.querySelectorAll("video").forEach(v => v.muted = false);
+}, { once: true });
 </script>
 
 </body>
