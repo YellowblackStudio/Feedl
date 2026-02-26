@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>FeedL</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+/* FEED */
+#feed {
+    height: 100vh;
+    width: 100vw;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+
+/* VIDEO */
+.video-box {
+    height: 100vh;
+    width: 100vw;
+    scroll-snap-align: start;
+    position: relative;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* TEXTO DO CRIADOR */
+.creator {
+    position: absolute;
+    bottom: 90px;
+    left: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 0 5px black;
+}
+
+/* DOWNBAR */
+#downbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 10;
+}
+
+#plus {
+    font-size: 34px;
+    background: white;
+    color: black;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    line-height: 48px;
+    text-decoration: none;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="feed"></div>
+
+<div id="downbar">
+    <div>🏠</div>
+    <a id="plus" href="">+</a>
+    <div>👤</div>
+</div>
+
+<script>
+// LISTA DE VÍDEOS COM CRIADOR
+const videos = [
+    { src: "videos/curiosidade_arthur.mp4", creator: "ARTHURGAMER" },
+    { src: "videos/minecraft.mp4", creator: "YELLOWBLACK" },
+    { src: "videos/roblox.mp4", creator: "PLAYER123" }
+];
+
+// EMBARALHAR ORDEM
+videos.sort(() => Math.random() - 0.5);
+
+const feed = document.getElementById("feed");
+
+videos.forEach(v => {
+    const box = document.createElement("div");
+    box.className = "video-box";
+
+    const video = document.createElement("video");
+    video.src = v.src;
+    video.loop = true;
+    video.playsInline = true;
+    video.controls = false;
+
+    const creator = document.createElement("div");
+    creator.className = "creator";
+    creator.textContent = "@" + v.creator;
+
+    box.appendChild(video);
+    box.appendChild(creator);
+    feed.appendChild(box);
+});
+
+/* AUTOPLAY */
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        const video = entry.target.querySelector("video");
+        if (entry.isIntersecting) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    });
+}, { threshold: 0.75 });
+
+document.querySelectorAll(".video-box").forEach(box => {
+    observer.observe(box);
+});
+</script>
+
+</body>
+</html>
